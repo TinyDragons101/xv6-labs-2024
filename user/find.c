@@ -20,18 +20,21 @@ fmtname(char *path)
 void
 find(char *path, char *fileName)
 {
-    char buf[50];
+    int fds;
+    char buf[512];
     char *p;
     struct dirent de;
     struct stat st;
 
-    // Read stat
-    if(stat(path, &st) != 0){
+    if((fds = open(path, O_RDONLY)) < 0){
+        fprintf(2, "ls: cannot open %s\n", path);
         return;
     }
     
-    // Eliminate recursion of . and ..
-    if((strcmp(fmtname(path), ".") == 0 && strlen(path) > 1) || strcmp(fmtname(path), "..") == 0){
+
+    if((fstat(fds, &st)) < 0) {
+        fprintf(2, "ls: cannot stat %s\n", path);
+        close(fds);
         return;
     }
 
@@ -39,28 +42,32 @@ find(char *path, char *fileName)
         case T_DEVICE:
         case T_FILE:
             if(strcmp(fmtname(path), fileName) == 0){
-                fprintf(2, "%s\n", path);
-                return;
+                printf("%s\n", path);
             }
             break;
         case T_DIR:
-            // if(strlen(path) + 1 + DIRSIZ + 1 > sizeof(buf)){
-            //     break;
-            // }
             strcpy(buf, path);
             p = buf+strlen(buf);
             *p++ = '/';
 
-            int fd = open(path, O_RDONLY); 
-            while(read(fd, &de, sizeof(de)) == sizeof(de)){
-                if(de.inum == 0)
+            while(read(fds, &de, sizeof(de)) == sizeof(de)){
+                if(de.inum == 0){
                     continue;
+                }
+
+                // Add folder name to p end
                 memmove(p, de.name, strlen(de.name));
                 p[strlen(de.name)] = 0;
+
+                if(strcmp(de.name, ".") == 0 || strcmp(de.name, "..") == 0){
+                    continue;
+                }
+
                 find(buf, fileName);
             }
             break;
     }
+    close(fds);
 }
 
 int

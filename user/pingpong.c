@@ -3,8 +3,11 @@
 #include "user/user.h"
 
 int main() {
-    int fds[2]; // file descriptors
-    pipe(fds); // create pipe for fds
+    int fds1[2]; // file descriptors
+    pipe(fds1); // create pipe from parent to child
+
+    int fds2[2];
+    pipe(fds2); // create pipe from child to parent
 
     int pid = fork();
 
@@ -13,15 +16,15 @@ int main() {
         int pid_parent = getpid();
         
         char parent_msg = 's';
-        write(fds[1], &parent_msg, 1); 
+        write(fds1[1], &parent_msg, 1); 
 
-        close(fds[1]);
+        close(fds1[1]);
         wait(0);
 
-        if(read(fds[0], &parent_msg, 1))
+        if(read(fds2[0], &parent_msg, 1))
             printf("%d: received pong\n", pid_parent);
 
-        close(fds[0]);
+        close(fds2[0]);
         exit(0);
     }
     else if (pid == 0) {
@@ -29,14 +32,14 @@ int main() {
         int pid_child = getpid();
 
         char child_msg;
-        if(read(fds[0], &child_msg, 1))
+        if(read(fds1[0], &child_msg, 1))
             printf("%d: received ping\n", pid_child);
 
-        close(fds[0]); 
+        close(fds1[0]); 
 
-        write(fds[1], &child_msg, 1); // write 1 byte to the parent;
+        write(fds2[1], &child_msg, 1); // write 1 byte to the parent;
         
-        close(fds[1]); // close the write end of the pipe;
+        close(fds2[1]); // close the write end of the pipe;
         exit(0); // exit the child;
     } else {
         fprintf(2, "fork failed\n");
