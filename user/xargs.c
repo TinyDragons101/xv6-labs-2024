@@ -5,6 +5,25 @@
 #include "kernel/fcntl.h"
 #include "kernel/param.h"
 
+char* strtok(char* str, const char* delim) {
+    static char* ptr;
+    if (str) {
+        ptr = str;
+    }
+    if (*ptr == '\0') {
+        return 0;
+    }
+    char* ret = ptr;
+    while (*ptr != '\0' && *ptr != *delim) {
+        ptr++;
+    }
+    if (*ptr == *delim) {
+        *ptr = '\0';
+        ptr++;
+    }
+    return ret;
+}
+
 int
 main(int argc, char* argv[]) {
 
@@ -23,7 +42,7 @@ main(int argc, char* argv[]) {
     for(i = 1; i < argc; i++) {
         args[i-1] = argv[i];
     }
-    args[argc-1] = 0; // reset the last argument to 0
+    // args[argc-1] = 0; // reset the last argument to 0
 
     // read from stdin to c
     char c;
@@ -32,24 +51,33 @@ main(int argc, char* argv[]) {
     char buf[512];
     // count number of characters in the buffer
     int cnt = 0;
+    int pipefd[2];
+    pipe(pipefd);
     while (read(0, &c, sizeof(char)) != 0 ) {
         // parent
         // split the input by '\n'
         // create a child process for each line
+        // child send to the parent argument via a pipe
+
         if (c == '\n') {
             buf[cnt] = '\0';
             int pid = fork();
             if (pid == 0) {
                 // child
-
                 // set the last argument to the read line
-                args[argc-1] = buf;
+                // read from buffer, argument seperated by ' '
+                char* token = strtok(buf, " ");
+                while (token != 0) {
+                    args[argc-1] = token;
+                    token = strtok(0, " ");
+                    argc++;
+                }
+                // args[argc-1] = buf;
                 exec(cmd, args);
                 exit(0);
             }
             else {
                 // parent
-
                 // reset the buffer
                 cnt = 0;
                 memset(buf, 0, sizeof(buf));
