@@ -61,8 +61,7 @@ main(int argc, char* argv[]) {
 
         if (c == '\n') {
             buf[cnt] = '\0';
-            int pid = fork();
-            if (pid == 0) {
+            if (fork() == 0) {
                 // child
                 // set the last argument to the read line
                 // read from buffer, argument seperated by ' '
@@ -78,12 +77,12 @@ main(int argc, char* argv[]) {
             }
             else {
                 // parent
+                // wait for the child to finish
+                wait(0);
+
                 // reset the buffer
                 cnt = 0;
                 memset(buf, 0, sizeof(buf));
-
-                // wait for the child to finish
-                wait(0);
             }
         }
         else {
