@@ -36,7 +36,7 @@ void find(char* path, char* file_name) {
     }
     // if the path is a file, check if the filename is the same as the file_name
     // if the path is a directory, find all file the directory with the name file_name and print
-    // check the subdirectories and find all file within it recursively
+    // check the subdirectories and find all file within it recursively     
 
     switch (st.type) {
         case T_FILE:

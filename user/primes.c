@@ -1,92 +1,79 @@
 #include "kernel/types.h"
 #include "user/user.h"
 
-void sieve(int left_p[2]) __attribute__((noreturn)); // the function doesn't return
 void sieve(int left_p[2]) {
-    // close write end of left pipe
-    close(left_p[1]);
-    // read prime from the left pipe
+    close(left_p[1]);  // close write end of left pipe
+    
     int p;
     if (read(left_p[0], &p, sizeof(int)) == 0) {
-        // no read, close the process
         close(left_p[0]);
-        // do i have to wait
         exit(0);
     }
 
-    // print the prime
     printf("prime %d\n", p);
 
-    // create pipe to push the sieved product to the child processes 
-    int right_p[2];
-    pipe(right_p);
+    int n;
+    int buf[32];  // Buffer to store numbers before forwarding them
+    int count = 0;
     
-    int fid = fork();
-
-    if (fid > 0) {
-        // read from left pipe, if it is not divisible by p then push to the right pipe
-        close(right_p[0]);
-
-        int n;
-        while(read(left_p[0], &n, sizeof(int)) > 0) {
-            if (n % p != 0) {
-                write(right_p[1], &n, sizeof(int));
+    // Collect numbers that are not divisible by p
+    while (read(left_p[0], &n, sizeof(int)) > 0) {
+        if (n % p != 0) {
+            buf[count++] = n;
+            if (count == 32) {
+                break;  // Process 32 numbers at a time
             }
         }
-
-        // close write and read ends in while loop
-        close(right_p[1]); 
-        close(left_p[0]);
-
-        wait(0);
-        exit(0);
     }
+    close(left_p[0]);  // close read end
 
-    else {
-        // if this is the child then process the right_p
-        close(left_p[0]); // close read of left pipe before continuing
-        sieve(right_p);
+    // If there are more numbers, pass them to the next sieve stage
+    if (count > 0) {
+        int right_p[2];
+        pipe(right_p);
+
+        if (fork() > 0) {
+            close(right_p[0]);  // parent only writes to right pipe
+
+            for (int i = 0; i < count; i++) {
+                write(right_p[1], &buf[i], sizeof(int));
+            }
+
+            while (read(left_p[0], &n, sizeof(int)) > 0) {
+                if (n % p != 0) {
+                    write(right_p[1], &n, sizeof(int));
+                }
+            }
+
+            close(right_p[1]);  // close write end
+            wait(0);            // wait for child to finish
+            exit(0);
+        } else {
+            close(right_p[1]);  // child only reads from right pipe
+            sieve(right_p);
+        }
     }
-
-    // close read port
-    close(right_p[0]);
-
-
 }
 
-int
-main() {
-    // create a pipe
+int main(int argc, char* argv[]) {
+    // argument checking
+    if (argc != 1) {
+        fprintf(2, "Usage: primes\n");
+        exit(1);
+    }
+
     int p[2];
     pipe(p);
 
-    int fid = fork();
-    if (fid > 0) {
-        // parent
-        // feed the numbers from 2 to 280 to the pipe for the child to sieve
-        // close read end
-        close(p[0]);
-        for(int i = 2; i <= 280; i++) {
+    if (fork() > 0) {
+        // parent: feed numbers from 2 to 283 to the pipe
+        for (int i = 2; i <= 283; i++) {
             write(p[1], &i, sizeof(int));
         }
-
-        // close write end
-        close(p[1]);
-        // wait for all child to exit
-        wait(0);
-    }
-
-    else {
-        // child
-        // close write end 
-        close(p[1]);
-        sieve(p);
-
-        // // close read and write end
-        close(p[0]);
-        close(p[1]);
-        // wait for all child to exit
-        wait(0);
+        close(p[1]);  // close write end
+        wait(0);      // wait for child to finish
+    } else {
+        sieve(p);     // child runs the sieve
     }
 
     exit(0);

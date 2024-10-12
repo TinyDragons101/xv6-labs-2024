@@ -5,6 +5,7 @@
 #include "kernel/fcntl.h"
 #include "kernel/param.h"
 
+// split the string by delimiter
 char* strtok(char* str, const char* delim) {
     static char* ptr;
     if (str) {
@@ -42,12 +43,11 @@ main(int argc, char* argv[]) {
     for(i = 1; i < argc; i++) {
         args[i-1] = argv[i];
     }
-    // args[argc-1] = 0; // reset the last argument to 0
 
     // read from stdin to c
     char c;
 
-    // buffer
+    // buffer serves as a temporary storage for the input line
     char buf[512];
     // count number of characters in the buffer
     int cnt = 0;

@@ -10,6 +10,12 @@ main(int argc, char *argv[]) {
         fprintf(2, "User forget to pass an argument.\n");
         exit(1);
     }
+
+    if (argc > 2) {
+        fprintf(2, "User pass too many arguments.\n");
+        exit(1);
+    }
+
     int tick = atoi(argv[1]);
     if (tick < 0) tick = 0;
 

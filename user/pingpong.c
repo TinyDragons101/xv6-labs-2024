@@ -2,7 +2,14 @@
 #include "kernel/stat.h"
 #include "user/user.h"
 
-int main() {
+int main(int argc, char *argv[]) {
+
+    // input handling
+    if (argc != 1) {
+        fprintf(2, "pingpong: no arguments needed\n");
+        exit(1);
+    }
+
     int fds1[2]; // file descriptors
     pipe(fds1); // create pipe from parent to child
 
