@@ -56,7 +56,6 @@ main(int argc, char* argv[]) {
          // parent
         // feed the numbers from 2 to 280 to the pipe for the child to sieve
         for (int i = 2; i <= 280; i++) {
-            // printf("writing %d \n", i);
             write(p[1], &i, sizeof(int));
         }
         close(p[1]);  // close write end

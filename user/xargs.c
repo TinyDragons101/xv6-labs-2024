@@ -51,8 +51,6 @@ main(int argc, char* argv[]) {
     char buf[512];
     // count number of characters in the buffer
     int cnt = 0;
-    int pipefd[2];
-    pipe(pipefd);
     while (read(0, &c, sizeof(char)) != 0 ) {
         // parent
         // split the input by '\n'
