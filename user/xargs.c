@@ -69,7 +69,6 @@ main(int argc, char* argv[]) {
                     token = strtok(0, " ");
                     argc++;
                 }
-                // args[argc-1] = buf;
                 exec(cmd, args);
                 exit(0);
             }
