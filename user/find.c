@@ -70,6 +70,7 @@ void find(char* path, char* file_name) {
 
 int
 main(int argc, char *argv[]) {
+    // argument checking
     if (argc != 3) {
         fprintf(2, "Usage: find <path> <file_name>\n");
         exit(1);

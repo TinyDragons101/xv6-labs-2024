@@ -1,8 +1,5 @@
 #include "kernel/types.h"
-#include "kernel/stat.h"
 #include "user/user.h"
-#include "kernel/fs.h"
-#include "kernel/fcntl.h"
 #include "kernel/param.h"
 
 // split the string by delimiter
@@ -28,7 +25,7 @@ char* strtok(char* str, const char* delim) {
 int
 main(int argc, char* argv[]) {
 
-    // error handling
+    // argument checking
     if (argc < 2) {
         fprintf(2, "xargs: no command given\n");
         exit(1);
