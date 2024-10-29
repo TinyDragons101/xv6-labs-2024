@@ -201,11 +201,8 @@ UPROGS=\
 	$U/_xargs\
 
 
-<<<<<<< HEAD
-=======
 
 
->>>>>>> remote-repo2/main
 ifeq ($(LAB),syscall)
 UPROGS += \
 	$U/_attack\

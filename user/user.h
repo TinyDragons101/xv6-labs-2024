@@ -1,7 +1,4 @@
-<<<<<<< HEAD
 #include "kernel/types.h"
-=======
->>>>>>> remote-repo2/main
 struct stat;
 
 // system calls

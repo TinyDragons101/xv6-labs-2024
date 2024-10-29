@@ -46,35 +46,6 @@ void find(char* path, char* file_name) {
             break;
         case T_DIR:
             strcpy(buf, path);
-<<<<<<< HEAD
-            p = buf+strlen(buf);
-            *p++ = '/';
-
-            while(read(fds, &de, sizeof(de)) == sizeof(de)){
-                if(de.inum == 0){
-                    continue;
-                }
-
-                memmove(p, de.name, strlen(de.name));
-                p[strlen(de.name)] = 0;
-
-                if(strcmp(de.name, ".") == 0 || strcmp(de.name, "..") == 0){
-                    continue;
-                }
-
-                find(buf, fileName);
-            }
-            break;
-    }
-    close(fds);
-}
-
-int
-main(int argc, char *argv[])
-{
-    if (argc < 3){
-        fprintf(2, "Error! Missing arguments");
-=======
             p = buf + strlen(buf);
             *p++ = '/';
             while (read(fd, &de, sizeof(de)) == sizeof(de)) {
@@ -102,15 +73,10 @@ main(int argc, char *argv[]) {
     // argument checking
     if (argc != 3) {
         fprintf(2, "Usage: find <path> <file_name>\n");
->>>>>>> remote-repo2/main
         exit(1);
     }
 
     find(argv[1], argv[2]);
 
     exit(0);
-<<<<<<< HEAD
-=======
-
->>>>>>> remote-repo2/main
 }
