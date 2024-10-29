@@ -1,10 +1,8 @@
 #include "kernel/types.h"
-#include "kernel/stat.h"
 #include "user/user.h"
-#include "kernel/fs.h"
-#include "kernel/fcntl.h"
 #include "kernel/param.h"
 
+// split the string by delimiter
 char* strtok(char* str, const char* delim) {
     static char* ptr;
     if (str) {
@@ -27,7 +25,7 @@ char* strtok(char* str, const char* delim) {
 int
 main(int argc, char* argv[]) {
 
-    // error handling
+    // argument checking
     if (argc < 2) {
         fprintf(2, "xargs: no command given\n");
         exit(1);
@@ -42,17 +40,14 @@ main(int argc, char* argv[]) {
     for(i = 1; i < argc; i++) {
         args[i-1] = argv[i];
     }
-    // args[argc-1] = 0; // reset the last argument to 0
 
     // read from stdin to c
     char c;
 
-    // buffer
+    // buffer serves as a temporary storage for the input line
     char buf[512];
     // count number of characters in the buffer
     int cnt = 0;
-    int pipefd[2];
-    pipe(pipefd);
     while (read(0, &c, sizeof(char)) != 0 ) {
         // parent
         // split the input by '\n'
@@ -61,8 +56,7 @@ main(int argc, char* argv[]) {
 
         if (c == '\n') {
             buf[cnt] = '\0';
-            int pid = fork();
-            if (pid == 0) {
+            if (fork() == 0) {
                 // child
                 // set the last argument to the read line
                 // read from buffer, argument seperated by ' '
@@ -72,18 +66,17 @@ main(int argc, char* argv[]) {
                     token = strtok(0, " ");
                     argc++;
                 }
-                // args[argc-1] = buf;
                 exec(cmd, args);
                 exit(0);
             }
             else {
                 // parent
+                // wait for the child to finish
+                wait(0);
+
                 // reset the buffer
                 cnt = 0;
                 memset(buf, 0, sizeof(buf));
-
-                // wait for the child to finish
-                wait(0);
             }
         }
         else {
