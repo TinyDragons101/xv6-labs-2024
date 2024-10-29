@@ -55,7 +55,6 @@ find(char *path, char *fileName)
                     continue;
                 }
 
-                // Add folder name to p end
                 memmove(p, de.name, strlen(de.name));
                 p[strlen(de.name)] = 0;
 
